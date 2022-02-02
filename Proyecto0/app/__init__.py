@@ -83,6 +83,9 @@ class PorEvento(Resource):
 
     def get(self, id_evento):
 
+        if Evento.query.filter_by(id_evento).first() is None:
+            return 'Evento no existe existe', 400
+
         evento = Evento.query.get_or_404(id_evento)
         return post_schema.dump(evento)
 
@@ -130,6 +133,8 @@ class PorEvento(Resource):
 
     def delete(self, id_evento):
 
+        if Evento.query.filter_by(id_evento).first() is None:
+            return 'Evento no existe existe', 400
         evento = Evento.query.get_or_404(id_evento)
 
         db.session.delete(evento)

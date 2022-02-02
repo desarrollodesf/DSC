@@ -27,7 +27,7 @@ login = LoginManager(app)
 login.login_view = 'login'
 
 from app import routes, models
-from app.models import Evento
+from app.models import Evento, User
 
 if not os.path.isfile(app.config['SQLALCHEMY_DATABASE_URI']):
     setup_database(app)
@@ -139,8 +139,30 @@ class PorEvento(Resource):
 
         return 'Evento Eliminado', 204
 
+class Usuario(Resource):
+    def post(self):
+        username = request.json['username']
+        email = request.json['email']
+        password = request.json['password']
+
+        user = User.query.filter_by(username=username).first()
+        if user is not None:
+            return 'Usuario ya existe', 400
+
+        user = User.query.filter_by(email=email).first()
+        if user is not None:
+            return 'Email de Usuario ya existe', 400
+
+        user_data = User(username=username, email=email )
+        user_data.set_password(password)
+        db.session.add(user_data)
+        db.session.commit()
+        return 'Usuario creado', 204
+
 api.add_resource(EventosPorUsuario, '/api/usuario/eventos/<int:id_usuario>')
 
 api.add_resource(Eventos, '/api/eventos/')
 
 api.add_resource(PorEvento,'/api/evento/<int:id_evento>')
+
+api.add_resource(Usuario,'/api/usuario/')

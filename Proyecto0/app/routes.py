@@ -104,11 +104,11 @@ def update():
         my_data.nombre = request.form['nombre']
         my_data.lugar = request.form['lugar']
         my_data.direccion = request.form['direccion']
-        my_data.fechaInicio = request.form['fechaInicio']
-        my_data.fechaFin = request.form['fechaFin']
+        my_data.fechaInicio = datetime.strptime(request.form['fechaInicio'],'%Y-%m-%d %H:%M:%S')
+        my_data.fechaFin = datetime.strptime(request.form['fechaFin'],'%Y-%m-%d %H:%M:%S')
         my_data.categoria = request.form['categoria']
         my_data.evento = request.form['evento']
-        
+
         db.session.commit()
         flash("Evento actualizado")
         events = Evento.query.filter_by(user_id=my_data.user_id)

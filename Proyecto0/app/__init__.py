@@ -53,23 +53,32 @@ class Eventos(Resource):
 
     def post(self):
 
-            nuevo_evento = Evento(
-                nombre = request.json['nombre'],
-                lugar = request.json['lugar'],
-                direccion = request.json['direccion'],
-                fechaInicio = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
-                fechaFin = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
-                categoria = request.json['categoria'],
-                evento = request.json['evento'],
-                fechaCreacion = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
-                user_id = request.json['user_id']     
-            )
+        categoria = ["conferencia", "seminario", "congreso", "curso"]
+        tipoevento = ["presencial", "virtual"]
 
-            db.session.add(nuevo_evento)
+        if not categoria.count(request.json['categoria'].lower()) > 0:
+            return 'Categoria no valida', 400
 
-            db.session.commit()
+        if not tipoevento.count(request.json['evento'].lower()) > 0:
+            return 'Evento no valido', 400
 
-            return post_schema.dump(nuevo_evento)
+        nuevo_evento = Evento(
+            nombre = request.json['nombre'],
+            lugar = request.json['lugar'],
+            direccion = request.json['direccion'],
+            fechaInicio = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
+            fechaFin = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
+            categoria = request.json['categoria'],
+            evento = request.json['evento'],
+            fechaCreacion = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
+            user_id = request.json['user_id']     
+        )
+
+        db.session.add(nuevo_evento)
+
+        db.session.commit()
+
+        return post_schema.dump(nuevo_evento)
 
 class EventosPorUsuario(Resource):
 
@@ -91,6 +100,8 @@ class PorEvento(Resource):
 
         evento = Evento.query.get_or_404(id_evento)
 
+        categoria = ["conferencia", "seminario", "congreso", "curso"]
+        tipoevento = ["presencial", "virtual"]
 
         if 'nombre' in request.json:
 
@@ -113,11 +124,16 @@ class PorEvento(Resource):
             evento.fechaFin = request.json['fechaFin']
 
         if 'categoria' in request.json:
+  
+            if not categoria.count(request.json['categoria'].lower()) > 0:
+                return 'Categoria no valida', 400
 
             evento.categoria = request.json['categoria']
 
         if 'evento' in request.json:
 
+            if not tipoevento.count(request.json['evento'].lower()) > 0:
+                return 'Evento no valido', 400
             evento.categoria = request.json['evento']
         
         if 'user_id' in request.json:

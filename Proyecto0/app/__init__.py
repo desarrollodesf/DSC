@@ -16,6 +16,7 @@ def setup_database(app):
         db.create_all()
 
 app = Flask(__name__)
+app.run(debug=True)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 login = LoginManager(app)
@@ -43,8 +44,7 @@ post_schema = Evento_Schema()
 
 posts_schema = Evento_Schema(many = True)
 
-
-class RecursoListarEventos(Resource):
+class Eventos(Resource):
 
     def get(self):
 
@@ -52,16 +52,14 @@ class RecursoListarEventos(Resource):
 
         return posts_schema.dump(eventos)
 
-
     def post(self):
 
             nuevo_evento = Evento(
                 nombre = request.json['nombre'],
                 lugar = request.json['lugar'],
                 direccion = request.json['direccion'],
-                
-                fechaInicio = datetime.fromisoformat(request.form['fechaInicio']),
-                fechaFin = datetime.fromisoformat(request.form['fechaFin']),
+                fechaInicio = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
+                fechaFin = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
                 categoria = request.json['categoria'],
                 evento = request.json['evento'],
                 fechaCreacion = datetime.strptime(datetime.utcnow().replace(tzinfo=pytz.utc).astimezone(pytz.timezone("America/New_York")).strftime('%Y-%m-%dT%H:%M'),'%Y-%m-%dT%H:%M'),
@@ -74,7 +72,15 @@ class RecursoListarEventos(Resource):
 
             return post_schema.dump(nuevo_evento)
 
-class RecursoUnEvento(Resource):
+class EventosPorUsuario(Resource):
+
+    def get(self, id_usuario):
+
+        events = Evento.query.filter_by(user_id=id_usuario)
+
+        return posts_schema.dump(events)
+
+class PorEvento(Resource):
 
     def get(self, id_evento):
 
@@ -134,6 +140,8 @@ class RecursoUnEvento(Resource):
 
         return 'Evento Eliminado', 204
 
-api.add_resource(RecursoListarEventos, '/api/eventos')
+api.add_resource(EventosPorUsuario, '/api/usuario/eventos/<int:id_usuario>')
 
-api.add_resource(RecursoUnEvento,'/api/eventos/<int:id_evento>')
+api.add_resource(Eventos, '/api/eventos/')
+
+api.add_resource(PorEvento,'/api/evento/<int:id_evento>')

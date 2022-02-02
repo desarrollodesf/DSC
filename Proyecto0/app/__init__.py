@@ -16,7 +16,6 @@ def setup_database(app):
         db.create_all()
 
 app = Flask(__name__)
-app.run(debug=True)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 login = LoginManager(app)
